@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旅游客服AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .chat-container {
+            width: 90%;
+            max-width: 500px;
+            height: 80vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .chat-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .chat-header p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message.user {
+            align-items: flex-end;
+        }
+        
+        .message.assistant {
+            align-items: flex-start;
+        }
+        
+        .message-bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.assistant .message-bubble {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .message-time {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 4px;
+        }
+        
+        .handoff-badge {
+            background: #f59e0b;
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-top: 5px;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 15px 20px;
+        }
+        
+        .typing-indicator.active {
+            display: flex;
+        }
+        
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: #999;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        
+        .chat-input-container {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #eee;
+        }
+        
+        .chat-input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .chat-input:focus {
+            border-color: #667eea;
+        }
+        
+        .send-btn {
+            width: 45px;
+            height: 45px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .quick-replies {
+            display: flex;
+            gap: 8px;
+            padding: 10px 20px;
+            overflow-x: auto;
+            background: #f8f9fa;
+        }
+        
+        .quick-reply {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #667eea;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        
+        .quick-reply:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>✈️ 旅游客服AI</h1>
+            <p><span class="status-badge"></span>在线为您服务</p>
+        </div>
+        
+        <div class="quick-replies">
+            <span class="quick-reply" onclick="sendQuick('你好')">你好</span>
+            <span class="quick-reply" onclick="sendQuick('有什么推荐的线路')">推荐线路</span>
+            <span class="quick-reply" onclick="sendQuick('巴厘岛多少钱')">巴厘岛价格</span>
+            <span class="quick-reply" onclick="sendQuick('可以退改吗')">退改政策</span>
+            <span class="quick-reply" onclick="sendQuick('儿童怎么收费')">儿童收费</span>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <!-- 消息将在这里显示 -->
+        </div>
+        
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="message-bubble">
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+                <input type="text" class="chat-input" id="chatInput" 
+                       placeholder="输入消息..." 
+                       onkeypress="handleKeyPress(event)">
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22,2 15,22 11,13 2,9"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sessionId = localStorage.getItem('travel_cs_session') || generateSessionId();
+        localStorage.setItem('travel_cs_session', sessionId);
+        
+        function generateSessionId() {
+            return Math.random().toString(36).substring(2, 10);
+        }
+        
+        function getCurrentTime() {
+            const now = new Date();
+            return now.getHours().toString().padStart(2, '0') + ':' + 
+                   now.getMinutes().toString().padStart(2, '0');
+        }
+        
+        function appendMessage(role, content, isHandoff = false) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            let handoffBadge = '';
+            if (isHandoff) {
+                handoffBadge = '<div class="handoff-badge">🚨 已转人工</div>';
+            }
+            
+            messageDiv.innerHTML = `
+                <div class="message-bubble">${content}</div>
+                <div class="message-time">${getCurrentTime()}${handoffBadge}</div>
+            `;
+            
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        function showTyping() {
+            document.getElementById('typingIndicator').classList.add('active');
+            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+        }
+        
+        function hideTyping() {
+            document.getElementById('typingIndicator').classList.remove('active');
+        }
+        
+        function setInputDisabled(disabled) {
+            document.getElementById('chatInput').disabled = disabled;
+            document.getElementById('sendBtn').disabled = disabled;
+        }
+        
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // 显示用户消息
+            appendMessage('user', message);
+            input.value = '';
+            
+            // 显示输入中状态
+            showTyping();
+            setInputDisabled(true);
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: message, 
+                        session_id: sessionId 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                hideTyping();
+                
+                if (response.ok) {
+                    appendMessage('assistant', data.response, data.handoff);
+                    sessionId = data.session_id;
+                } else {
+                    appendMessage('assistant', '抱歉，服务暂时出现问题，请稍后重试。');
+                }
+            } catch (error) {
+                hideTyping();
+                appendMessage('assistant', '网络错误，请检查连接后重试。');
+                console.error('Error:', error);
+            }
+            
+            setInputDisabled(false);
+            document.getElementById('chatInput').focus();
+        }
+        
+        function sendQuick(text) {
+            document.getElementById('chatInput').value = text;
+            sendMessage();
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        // 页面加载时显示欢迎消息
+        window.onload = function() {
+            setTimeout(() => {
+                appendMessage('assistant', '您好！我是您的旅游顾问，请问有什么可以帮您？您可以问我关于线路推荐、价格、预订、退改等方面的问题。');
+            }, 500);
+        };
+    </script>
+</body>
+</html>

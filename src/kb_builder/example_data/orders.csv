@@ -1,0 +1,6 @@
+order_id,product_name,price,customer_id,status,refund_reason,created_at
+ORD001,巴厘岛7日尊享游,8999,C001,completed,,2026-01-15
+ORD002,东京5日深度游,12999,C002,refunded,行程变更,2026-01-20
+ORD003,普吉岛6日自由行,4999,C003,completed,,2026-01-22
+ORD004,巴厘岛7日尊享游,8999,C004,completed,,2026-01-25
+ORD005,马尔代夫蜜月游,25999,C005,refunded,个人身体原因,2026-02-01

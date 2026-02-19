@@ -1,0 +1,16 @@
+[
+  {
+    "session_id": "SESS001",
+    "messages": [
+      {"role": "customer", "content": "你好，请问巴厘岛多少钱？", "timestamp": "2026-02-10T10:00:00Z"},
+      {"role": "agent", "content": "您好，巴厘岛7日游价格是8999元，包含五星酒店和接送机。", "timestamp": "2026-02-10T10:01:00Z"}
+    ]
+  },
+  {
+    "session_id": "SESS002", 
+    "messages": [
+      {"role": "customer", "content": "可以退改吗？", "timestamp": "2026-02-11T14:00:00Z"},
+      {"role": "agent", "content": "可以退改的，出发前7天全额退款，3-7天扣30%。", "timestamp": "2026-02-11T14:02:00Z"}
+    ]
+  }
+]
